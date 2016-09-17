@@ -322,12 +322,15 @@ module Isuconp
         if params["file"][:type].include? "jpeg"
           mime = "image/jpeg"
           ext = 'jpg'
+          ext_num = 1
         elsif params["file"][:type].include? "png"
           mime = "image/png"
           ext = 'png'
+          ext_num = 2
         elsif params["file"][:type].include? "gif"
           mime = "image/gif"
           ext = 'gif'
+          ext_num = 3
         else
           flash[:notice] = '投稿できる画像形式はjpgとpngとgifだけです'
           redirect '/', 302
@@ -343,12 +346,12 @@ module Isuconp
         file_tmppath = "/home/isucon/private_isu/webapp/public/image/tmp/#{session[:csrf_token]}.#{ext}"
         File.binwrite(file_tmppath, img_body)
 
-        query = 'INSERT INTO `posts` (`user_id`, `mime`, `imgdata`, `body`) VALUES (?,?,?,?)'
+        query = 'INSERT INTO `posts` (`user_id`, `body`, `account_name`, `ext`) VALUES (?,?,?,?)'
         db.prepare(query).execute(
           me[:id],
-          mime,
-          "",
           params["body"],
+          me[:account_name],
+          ext_num,
         )
         pid = db.last_id
 
