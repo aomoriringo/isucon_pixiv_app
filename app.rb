@@ -10,7 +10,6 @@ module Isuconp
   class App < Sinatra::Base
     use Rack::Session::Memcache, autofix_keys: true, secret: ENV['ISUCONP_SESSION_SECRET'] || 'sendagaya'
     use Rack::Flash
-    use Rack::Lineprof, profile: 'app.rb' if ENV['RACK_ENV'] == 'development'
 
     set :public_folder, File.expand_path('../../public', __FILE__)
 
@@ -21,6 +20,7 @@ module Isuconp
     configure :development do
       register Sinatra::Reloader
       use BetterErrors::Middleware
+      use Rack::Lineprof, profile: 'app.rb'
       BetterErrors.application_root = __dir__
     end
 
