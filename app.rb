@@ -320,6 +320,7 @@ SQL
     end
 
     get '/posts' do
+=begin
       max_created_at = params['max_created_at']
       results = db.prepare(<<SQL
 SELECT p.id AS id, p.user_id AS user_id, p.body AS body, p.created_at AS created_at, p.ext AS ext, p.account_name AS account_name, u.del_flg AS del_flg
@@ -333,6 +334,20 @@ SQL
       # results = db.prepare('SELECT `id`, `user_id`, `body`, `created_at`, `ext` FROM `posts` WHERE `created_at` <= ? ORDER BY `created_at` DESC').execute(
       #   max_created_at.nil? ? nil : Time.iso8601(max_created_at).localtime
       # )
+      posts = make_posts(results)
+=end
+
+      max_created_at = params['max_created_at'].nil? ? "" : "AND p.created_at <= #{params['max_created_at']}"
+
+      query = <<SQL
+SELECT p.id AS id, p.user_id AS user_id, p.body AS body, p.created_at AS created_at, p.ext AS ext, p.account_name AS account_name, u.del_flg AS del_flg
+FROM posts p JOIN users u ON p.user_id = u.id
+WHERE u.del_flg = 0 #{max_created_at}
+ORDER BY p.created_at DESC
+LIMIT 20
+SQL
+
+      results = db.query(query)
       posts = make_posts(results)
 
       erb :posts, layout: false, locals: { posts: posts }
