@@ -154,7 +154,7 @@ module Isuconp
           query = 'SELECT `comment`, `account_name` FROM `comments` WHERE `post_id` = ? ORDER BY `created_at` DESC'
           query += ' LIMIT 3' unless all_comments
 
-          post[:comments] = db.prepare(query).execute(result[:id]).reverse
+          post[:comments] = db.prepare(query).execute(result[:id])
           post[:user] = db.prepare('SELECT * FROM `users` WHERE `id` = ?').execute(post[:user_id]).first
 
           post
