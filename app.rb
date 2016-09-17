@@ -313,29 +313,39 @@ module Isuconp
         # 投稿のContent-Typeからファイルのタイプを決定する
         if params["file"][:type].include? "jpeg"
           mime = "image/jpeg"
+          ext = 'jpg'
         elsif params["file"][:type].include? "png"
           mime = "image/png"
+          ext = 'png'
         elsif params["file"][:type].include? "gif"
           mime = "image/gif"
+          ext = 'gif'
         else
           flash[:notice] = '投稿できる画像形式はjpgとpngとgifだけです'
           redirect '/', 302
         end
 
-        if params['file'][:tempfile].read.length > UPLOAD_LIMIT
+        img_body = params['file'][:tempfile].read
+
+        if img_body.length > UPLOAD_LIMIT
           flash[:notice] = 'ファイルサイズが大きすぎます'
           redirect '/', 302
         end
 
-        params['file'][:tempfile].rewind
+        file_tmppath = "/home/isucon/private_isu/webapp/public/image/tmp/#{session[:csrf_token]}.#{ext}"
+        File.binwrite(file_tmppath, img_body)
+
         query = 'INSERT INTO `posts` (`user_id`, `mime`, `imgdata`, `body`) VALUES (?,?,?,?)'
         db.prepare(query).execute(
           me[:id],
           mime,
-          params["file"][:tempfile].read,
+          "",
           params["body"],
         )
         pid = db.last_id
+
+        file_path = "/home/isucon/private_isu/webapp/public/image/#{pid}.#{ext}"
+        FileUtils.mv(file_tmppath, file_path)
 
         redirect "/posts/#{pid}", 302
       else
