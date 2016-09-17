@@ -337,7 +337,7 @@ SQL
       posts = make_posts(results)
 =end
 
-      max_created_at = params['max_created_at'].nil? ? "" : "AND p.created_at <= #{params['max_created_at']}"
+      max_created_at = params['max_created_at'].nil? ? "" : "AND p.created_at <= '#{params['max_created_at']}'"
 
       query = <<SQL
 SELECT p.id AS id, p.user_id AS user_id, p.body AS body, p.created_at AS created_at, p.ext AS ext, p.account_name AS account_name, u.del_flg AS del_flg
