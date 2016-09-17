@@ -346,11 +346,11 @@ module Isuconp
         file_tmppath = "/home/isucon/private_isu/webapp/public/image/tmp/#{session[:csrf_token]}.#{ext}"
         File.binwrite(file_tmppath, img_body)
 
-        query = 'INSERT INTO `posts` (`user_id`, `imgdata`, `body`, `ext`) VALUES (?,?,?,?)'
+        query = 'INSERT INTO `posts` (`user_id`, `body`, `account_name`, `ext`) VALUES (?,?,?,?)'
         db.prepare(query).execute(
           me[:id],
-          "",
           params["body"],
+          me[:account_name],
           ext_num,
         )
         pid = db.last_id
