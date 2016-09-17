@@ -22,3 +22,7 @@ REPLACE INTO good_comments SELECT c.id, c.post_id, c.user_id, c.comment, c.creat
 FROM comments c
 JOIN users u ON c.user_id = u.id;
 RENAME TABLE comments TO comments_old, good_comments TO comments;
+
+#############################
+ALTER TABLE comments ADD INDEX post_id(post_id);
+
