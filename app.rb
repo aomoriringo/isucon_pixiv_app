@@ -95,12 +95,18 @@ SQL
           redis.rpush('index_posts', post[:id])
           redis.hset('index_cache', post[:id], render_index_post({id: post[:id]}))
         end
+
+        db.query("SELECT `id`, `account_name` FROM `users`").each do |user|
+          redis.hset('pass', user[:id], user[:account_name]*2)
+        end
+
       end
 
       def try_login(account_name, password)
-        user = db.prepare('SELECT * FROM users WHERE account_name = ? AND del_flg = 0').execute(account_name).first
+        user = db.prepare('SELECT `id`, `account_name`, `authority` FROM users WHERE account_name = ? AND del_flg = 0').execute(account_name).first
 
-        if user && calculate_passhash(user[:account_name], password) == user[:passhash]
+        #if user && calculate_passhash(user[:account_name], password) == user[:passhash]
+        if user && password == redis.hget('pass', user[:id])
           return user
         elsif user
           return nil
@@ -289,6 +295,9 @@ SQL
       session[:user] = {
         id: db.last_id
       }
+
+      redis.hset('pass', db.last_id, password)
+
       session[:csrf_token] = SecureRandom.hex(16)
       redirect '/', 302
     end
