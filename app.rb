@@ -10,7 +10,6 @@ module Isuconp
   class App < Sinatra::Base
     use Rack::Session::Memcache, autofix_keys: true, secret: ENV['ISUCONP_SESSION_SECRET'] || 'sendagaya'
     use Rack::Flash
-    use Rack::Lineprof, profile: 'app.rb' if ENV['RACK_ENV'] == 'development'
 
     set :public_folder, File.expand_path('../../public', __FILE__)
 
@@ -19,8 +18,11 @@ module Isuconp
     POSTS_PER_PAGE = 20
 
     configure :development do
+      require "better_errors"
+      require "binding_of_caller"
       register Sinatra::Reloader
       use BetterErrors::Middleware
+      use Rack::Lineprof, profile: 'app.rb'
       BetterErrors.application_root = __dir__
     end
 
@@ -156,7 +158,6 @@ module Isuconp
 
           post[:comments] = db.prepare(query).execute(result[:id])
           post[:user] = db.prepare('SELECT * FROM `users` WHERE `id` = ?').execute(result[:user_id]).first
-
 
           post
         end
@@ -455,11 +456,12 @@ SQL
       end
       post_id = params['post_id']
 
-      query = 'INSERT INTO `comments` (`post_id`, `user_id`, `comment`) VALUES (?,?,?)'
+      query = 'INSERT INTO `comments` (`post_id`, `user_id`, `comment`, `account_name`) VALUES (?,?,?,?)'
       db.prepare(query).execute(
         post_id,
         me[:id],
-        params['comment']
+        params['comment'],
+        me[:account_name],
       )
 
       redirect "/posts/#{post_id}", 302
