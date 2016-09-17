@@ -1,13 +1,10 @@
 
-ENV['RACK_ENV'] = 'development'
-
+require 'bundler'
+Bundler.require
 require 'sinatra/base'
 require "sinatra/reloader"
-require 'mysql2'
 require 'rack-flash'
 require 'shellwords'
-
-require 'rack-lineprof' if ENV['RACK_ENV'] == 'development'
 
 module Isuconp
   class App < Sinatra::Base
