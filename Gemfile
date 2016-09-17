@@ -8,7 +8,8 @@ gem "foreman"
 gem "unicorn"
 gem "mysql2"
 gem "rack-flash3", require: false
-
+gem "redis"
+gem "redis-namespace"
 
 group :development do
   gem 'rack-lineprof', github: 'kainosnoema/rack-lineprof'

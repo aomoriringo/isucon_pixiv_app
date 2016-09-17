@@ -56,6 +56,13 @@ module Isuconp
         client
       end
 
+      def redis
+        return Thread.current[:isuconp_redis] if Thread.current[:isuconp_redis]
+        client = Redis.new
+        Thread.current[:isuconp_redis] = client
+        client
+      end
+
       def db_initialize
         sql = []
         sql << 'DELETE FROM users WHERE id > 1000'
@@ -72,6 +79,21 @@ module Isuconp
         FileUtils.mv('/home/isucon/private_isu/webapp/public/image/10000.png', '/home/isucon/private_isu/webapp/public/image/10000.png.backup')
         FileUtils.rm(Dir.glob('/home/isucon/private_isu/webapp/public/image/[123456789]????*.???'))
         FileUtils.mv('/home/isucon/private_isu/webapp/public/image/10000.png.backup', '/home/isucon/private_isu/webapp/public/image/10000.png')
+      end
+
+      def redis_initialize
+        query = <<SQL
+SELECT p.id AS id, p.user_id AS user_id, p.body AS body, p.created_at AS created_at, p.ext AS ext, p.account_name AS account_name, u.del_flg AS del_flg
+FROM posts p JOIN users u ON p.user_id = u.id
+WHERE u.del_flg = 0
+ORDER BY p.created_at DESC
+LIMIT 100
+SQL
+
+        db.query(query).each do |post|
+          redis.lpush(post[:id])
+          redis.hset('index_cache', post[:id], render_index_post({id: post[:id]}))
+        end
       end
 
       def try_login(account_name, password)
@@ -163,6 +185,25 @@ module Isuconp
         end
       end
 
+      def render_index_post(post_detail, new_post=false)
+
+        post = if new_post
+                 post_detail
+               else
+                 post_result = db.query("SELECT `account_name`, `body`, `ext`, `created_at` FROM `posts` WHERE `id` = #{post_detail[:id]}").first
+
+                 post_detail[:account_name] = post_result[:account_name]
+                 post_detail[:body] = post_result[:body]
+                 post_detail[:ext] = post_result[:ext]
+                 post_detail[:created_at] = post_result[:created_at]
+                 post_detail[:comments] = db.query("SELECT `comment`, `account_name` FROM `comments` WHERE `post_id` = #{post_detail[:id]} ORDER BY `created_at` DESC LIMIT 3")
+                 post_detail[:comment_count] = db.query("SELECT COUNT(*) AS `count` FROM `comments` WHERE `post_id` = #{post_detail[:id]}").first[:count]
+                 post_detail
+               end
+
+        erb :post_i, locals: { post: post }
+      end
+
       def image_url(post)
         ext = ""
         if post[:ext] == 1
@@ -180,6 +221,7 @@ module Isuconp
     get '/initialize' do
       db_initialize
       image_initialize
+      redis_initialize
       return 200
     end
 
@@ -257,7 +299,7 @@ module Isuconp
 
     get '/' do
       me = get_session_user()
-
+=begin
       query = <<SQL
 SELECT p.id AS id, p.user_id AS user_id, p.body AS body, p.created_at AS created_at, p.ext AS ext, p.account_name AS account_name, u.del_flg AS del_flg
 FROM posts p JOIN users u ON p.user_id = u.id
@@ -268,8 +310,11 @@ SQL
 
       results = db.query(query)
       posts = make_posts(results)
+=end
 
+      posts = redis.hmget('index_cache', redis.lrange(0, 19))
       erb :index, layout: :layout, locals: { posts: posts, me: me }
+
     end
 
     get '/@:account_name' do
@@ -425,10 +470,23 @@ SQL
           me[:account_name],
           ext_num,
         )
+        created_at = Time.now
         pid = db.last_id
 
         file_path = "/home/isucon/private_isu/webapp/public/image/#{pid}.#{ext}"
         FileUtils.mv(file_tmppath, file_path)
+
+        post_detail = {
+          id: pid,
+          account_name: me[:account_name],
+          body: params["body"],
+          ext: ext_num,
+          created_at: created_at,
+          comment_count: 0,
+          comments: [],
+        }
+
+        redis.hset('index_cache', pid, render_index_post(post_detail), true)
 
         redirect "/posts/#{pid}", 302
       else
@@ -479,6 +537,12 @@ SQL
         params['comment'],
         me[:account_name],
       )
+
+      post_detail = {
+        id: post_id,
+      }
+
+      redis.hset('index_cache', params['post_id'], render_index_post(post_detail))
 
       redirect "/posts/#{post_id}", 302
     end

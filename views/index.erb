@@ -18,7 +18,17 @@
   </form>
 </div>
 
-<%= erb :posts, locals: { posts: posts } %>
+<div class="isu-posts">
+  <% posts.each do |post| %>
+    <%= post %>
+    <input type="hidden" name="csrf_token" value="<%= escape_html session[:csrf_token] %>">
+    <input type="submit" name="submit" value="submit">
+    </form>
+    </div>
+    </div>
+    </div>
+  <% end %>
+</div>
 
 <div id="isu-post-more">
   <button id="isu-post-more-btn">もっと見る</button>
