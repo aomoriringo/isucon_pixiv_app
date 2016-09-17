@@ -145,11 +145,11 @@ module Isuconp
 
       def image_url(post)
         ext = ""
-        if post[:mime] == "image/jpeg"
+        if post[:ext] == 1
           ext = ".jpg"
-        elsif post[:mime] == "image/png"
+        elsif post[:ext] == 2
           ext = ".png"
-        elsif post[:mime] == "image/gif"
+        elsif post[:ext] == 3
           ext = ".gif"
         end
 
