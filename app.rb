@@ -358,6 +358,7 @@ SQL
 SELECT p.id AS id, p.user_id AS user_id, p.body AS body, p.created_at AS created_at, p.ext AS ext, p.account_name AS account_name, u.del_flg AS del_flg
 FROM posts p JOIN users u ON p.user_id = u.id
 WHERE p.id = ?
+LIMIT 20
 SQL
       ).execute(
         params[:id]
