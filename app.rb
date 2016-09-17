@@ -151,13 +151,13 @@ module Isuconp
 =end
         results.to_a.each do |result|
           post = result
-          post[:comment_count] = db.prepare('SELECT COUNT(*) AS `count` FROM `comments` WHERE `post_id` = ?').execute(result[:id]).first[:count]
+          post[:comment_count] = db.xquery('SELECT COUNT(*) AS `count` FROM `comments` WHERE `post_id` = ?', result[:id]).first[:count]
 
           query = 'SELECT `comment`, `account_name` FROM `comments` WHERE `post_id` = ? ORDER BY `created_at` DESC'
           query += ' LIMIT 3' unless all_comments
 
-          post[:comments] = db.prepare(query).execute(result[:id])
-          post[:user] = db.prepare('SELECT * FROM `users` WHERE `id` = ?').execute(result[:user_id]).first
+          post[:comments] = db.xquery(query, result[:id])
+          post[:user] = db.xquery('SELECT * FROM `users` WHERE `id` = ?', result[:user_id]).first
 
           post
         end
