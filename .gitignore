@@ -1,2 +1,6 @@
 .bundle
 vendor
+
+tmp
+unicorn.pid
+unicorn.sock

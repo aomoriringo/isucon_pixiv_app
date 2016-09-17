@@ -7,10 +7,14 @@ require 'mysql2'
 require 'rack-flash'
 require 'shellwords'
 
+require 'rack-lineprof' if ENV['RACK_ENV'] == 'development'
+
 module Isuconp
   class App < Sinatra::Base
     use Rack::Session::Memcache, autofix_keys: true, secret: ENV['ISUCONP_SESSION_SECRET'] || 'sendagaya'
     use Rack::Flash
+    use Rack::Lineprof, profile: 'app.rb' if ENV['RACK_ENV'] == 'development'
+
     set :public_folder, File.expand_path('../../public', __FILE__)
 
     UPLOAD_LIMIT = 10 * 1024 * 1024 # 10mb
@@ -238,14 +242,15 @@ module Isuconp
     get '/' do
       me = get_session_user()
 
-      results = db.query(<<SQL
+      query = <<SQL
 SELECT p.id AS id, p.user_id AS user_id, p.body AS body, p.created_at AS created_at, p.ext AS ext, u.del_flg AS del_flg
 FROM posts p JOIN users u ON p.user_id = u.id
 WHERE u.del_flg = 0
 ORDER BY p.created_at DESC
+LIMIT 20
 SQL
-      )
 
+      results = db.query(query)
       posts = make_posts(results)
 
       erb :index, layout: :layout, locals: { posts: posts, me: me }
