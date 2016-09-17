@@ -259,9 +259,9 @@ module Isuconp
       me = get_session_user()
 
       query = <<SQL
-SELECT p.id AS id, p.user_id AS user_id, p.body AS body, p.created_at AS created_at, p.ext AS ext, p.account_name AS account_name, u.del_flg AS del_flg
-FROM posts p JOIN users u ON p.user_id = u.id
-WHERE u.del_flg = 0
+SELECT p.id AS id, p.user_id AS user_id, p.body AS body, p.created_at AS created_at, p.ext AS ext, p.account_name AS account_name, p.del_flg AS del_flg
+FROM posts p
+WHERE p.del_flg = 0
 ORDER BY p.created_at DESC
 LIMIT 20
 SQL
@@ -282,9 +282,9 @@ SQL
       end
 
       results = db.prepare(<<SQL
-SELECT p.id AS id, p.user_id AS user_id, p.body AS body, p.created_at AS created_at, p.ext AS ext, p.account_name AS account_name, u.del_flg AS del_flg
-FROM posts p JOIN users u ON p.user_id = u.id
-WHERE u.id = ? AND u.del_flg = 0
+SELECT p.id AS id, p.user_id AS user_id, p.body AS body, p.created_at AS created_at, p.ext AS ext, p.account_name AS account_name, p.del_flg AS del_flg
+FROM posts p
+WHERE p.user_id = ? AND p.del_flg = 0
 ORDER BY p.created_at DESC
 SQL
       ).execute(
@@ -339,9 +339,9 @@ SQL
       max_created_at = params['max_created_at'].nil? ? "" : "p.created_at <= '#{params['max_created_at']}' AND "
 
       query = <<SQL
-SELECT p.id AS id, p.user_id AS user_id, p.body AS body, p.created_at AS created_at, p.ext AS ext, p.account_name AS account_name, u.del_flg AS del_flg
-FROM posts p JOIN users u ON p.user_id = u.id
-WHERE #{max_created_at} u.del_flg = 0
+SELECT p.id AS id, p.user_id AS user_id, p.body AS body, p.created_at AS created_at, p.ext AS ext, p.account_name AS account_name, p.del_flg AS del_flg
+FROM posts p
+WHERE #{max_created_at} p.del_flg = 0
 ORDER BY p.created_at DESC
 LIMIT 20
 SQL
@@ -354,8 +354,8 @@ SQL
 
     get '/posts/:id' do
       results = db.prepare(<<SQL
-SELECT p.id AS id, p.user_id AS user_id, p.body AS body, p.created_at AS created_at, p.ext AS ext, p.account_name AS account_name, u.del_flg AS del_flg
-FROM posts p JOIN users u ON p.user_id = u.id
+SELECT p.id AS id, p.user_id AS user_id, p.body AS body, p.created_at AS created_at, p.ext AS ext, p.account_name AS account_name, p.del_flg AS del_flg
+FROM posts p
 WHERE p.id = ?
 LIMIT 20
 SQL
@@ -515,9 +515,11 @@ SQL
       end
 
       query = 'UPDATE `users` SET `del_flg` = ? WHERE `id` = ?'
+      query2 = 'UPDATE `posts` SET `del_flg` = ? WHERE `user_id` = ?'
 
       params['uid'].each do |id|
         db.prepare(query).execute(1, id.to_i)
+        db.prepare(query2).execute(1, id.to_i)
       end
 
       redirect '/admin/banned', 302
