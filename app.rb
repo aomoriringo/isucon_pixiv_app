@@ -156,7 +156,7 @@ module Isuconp
           query += ' LIMIT 3' unless all_comments
 
           post[:comments] = db.prepare(query).execute(result[:id])
-          post[:user] = db.prepare('SELECT * FROM `users` WHERE `id` = ?').execute(post[:user_id]).first
+          post[:user] = db.prepare('SELECT * FROM `users` WHERE `id` = ?').execute(result[:user_id]).first
 
           post
         end
