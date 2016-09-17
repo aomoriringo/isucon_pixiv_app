@@ -20,6 +20,7 @@ module Isuconp
     configure :development do
       require "better_errors"
       require "binding_of_caller"
+      gem 'rack-lineprof', github: 'kainosnoema/rack-lineprof'
       register Sinatra::Reloader
       use BetterErrors::Middleware
       use Rack::Lineprof, profile: 'app.rb'
@@ -259,7 +260,7 @@ module Isuconp
       me = get_session_user()
 
       query = <<SQL
-SELECT p.id AS id, p.user_id AS user_id, p.body AS body, p.created_at AS created_at, p.ext AS ext, u.del_flg AS del_flg
+SELECT p.id AS id, p.user_id AS user_id, p.body AS body, p.created_at AS created_at, p.ext AS ext, p.account_name AS account_name, u.del_flg AS del_flg
 FROM posts p JOIN users u ON p.user_id = u.id
 WHERE u.del_flg = 0
 ORDER BY p.created_at DESC
@@ -282,7 +283,7 @@ SQL
       end
 
       results = db.prepare(<<SQL
-SELECT p.id AS id, p.user_id AS user_id, p.body AS body, p.created_at AS created_at, p.ext AS ext, u.del_flg AS del_flg
+SELECT p.id AS id, p.user_id AS user_id, p.body AS body, p.created_at AS created_at, p.ext AS ext, p.account_name AS account_name, u.del_flg AS del_flg
 FROM posts p JOIN users u ON p.user_id = u.id
 WHERE u.id = ? AND u.del_flg = 0
 ORDER BY p.created_at DESC
@@ -321,7 +322,7 @@ SQL
     get '/posts' do
       max_created_at = params['max_created_at']
       results = db.prepare(<<SQL
-SELECT p.id AS id, p.user_id AS user_id, p.body AS body, p.created_at AS created_at, p.ext AS ext, u.del_flg AS del_flg
+SELECT p.id AS id, p.user_id AS user_id, p.body AS body, p.created_at AS created_at, p.ext AS ext, p.account_name AS account_name, u.del_flg AS del_flg
 FROM posts p JOIN users u ON p.user_id = u.id
 WHERE p.created_at <= ?
 ORDER BY p.created_at DESC
@@ -339,7 +340,7 @@ SQL
 
     get '/posts/:id' do
       results = db.prepare(<<SQL
-SELECT p.id AS id, p.user_id AS user_id, p.body AS body, p.created_at AS created_at, p.ext AS ext, u.del_flg AS del_flg
+SELECT p.id AS id, p.user_id AS user_id, p.body AS body, p.created_at AS created_at, p.ext AS ext, p.account_name AS account_name, u.del_flg AS del_flg
 FROM posts p JOIN users u ON p.user_id = u.id
 WHERE p.id = ?
 SQL
