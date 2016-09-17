@@ -7,10 +7,14 @@ require 'mysql2'
 require 'rack-flash'
 require 'shellwords'
 
+require 'rack-lineprof' if ENV['RACK_ENV'] == 'development'
+
 module Isuconp
   class App < Sinatra::Base
     use Rack::Session::Memcache, autofix_keys: true, secret: ENV['ISUCONP_SESSION_SECRET'] || 'sendagaya'
     use Rack::Flash
+    use Rack::Lineprof, profile: 'app.rb' if ENV['RACK_ENV'] == 'development'
+
     set :public_folder, File.expand_path('../../public', __FILE__)
 
     UPLOAD_LIMIT = 10 * 1024 * 1024 # 10mb
