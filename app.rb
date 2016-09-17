@@ -157,7 +157,6 @@ module Isuconp
           post[:comments] = db.prepare(query).execute(result[:id])
           post[:user] = db.prepare('SELECT * FROM `users` WHERE `id` = ?').execute(result[:user_id]).first
 
-
           post
         end
       end
@@ -446,11 +445,12 @@ SQL
       end
       post_id = params['post_id']
 
-      query = 'INSERT INTO `comments` (`post_id`, `user_id`, `comment`) VALUES (?,?,?)'
+      query = 'INSERT INTO `comments` (`post_id`, `user_id`, `comment`, `account_name`) VALUES (?,?,?,?)'
       db.prepare(query).execute(
         post_id,
         me[:id],
-        params['comment']
+        params['comment'],
+        me[:account_name],
       )
 
       redirect "/posts/#{post_id}", 302
