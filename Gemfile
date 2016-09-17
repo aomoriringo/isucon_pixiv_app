@@ -1,12 +1,17 @@
 # A sample Gemfile
 source "https://rubygems.org"
 
-gem "sinatra"
-gem "sinatra-contrib"
-gem "memcache-client"
+gem "sinatra", require: false
+gem "sinatra-contrib", require: false
+gem "memcache-client", require: false
 gem "foreman"
 gem "unicorn"
 gem "mysql2"
-gem "rack-flash3"
+gem "rack-flash3", require: false
 
-gem 'rack-lineprof', github: 'kainosnoema/rack-lineprof'
+
+group :development do
+  gem 'rack-lineprof', github: 'kainosnoema/rack-lineprof'
+  gem "better_errors"
+  gem "binding_of_caller"
+end
