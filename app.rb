@@ -486,6 +486,7 @@ SQL
           comments: [],
         }
 
+        redis.lpush('index_posts', pid)
         redis.hset('index_cache', pid, render_index_post(post_detail), true)
 
         redirect "/posts/#{pid}", 302
@@ -580,11 +581,17 @@ SQL
 
       query = 'UPDATE `users` SET `del_flg` = ? WHERE `id` = ?'
       query2 = 'UPDATE `posts` SET `del_flg` = ? WHERE `user_id` = ?'
+      query3 = 'SELECT `id` FROM `posts` WHERE `user_id` = ?'
 
       params['uid'].each do |id|
         db.prepare(query).execute(1, id.to_i)
         db.prepare(query2).execute(1, id.to_i)
+        db.query(query3).each do |post|
+          redis.lrem('index_posts', 1, post[:id])
+        end
       end
+
+
 
       redirect '/admin/banned', 302
     end
