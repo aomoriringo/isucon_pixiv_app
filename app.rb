@@ -20,7 +20,7 @@ module Isuconp
     configure :development do
       require "better_errors"
       require "binding_of_caller"
-      gem 'rack-lineprof', github: 'kainosnoema/rack-lineprof'
+      require 'rack-lineprof'
       register Sinatra::Reloader
       use BetterErrors::Middleware
       use Rack::Lineprof, profile: 'app.rb'
