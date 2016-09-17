@@ -201,7 +201,7 @@ SQL
                  post_detail
                end
 
-        erb :post_i, locals: { post: post }
+        erb :post_i, layout: nil, locals: { post: post }
       end
 
       def image_url(post)
