@@ -336,9 +336,18 @@ SQL
     end
 
     get '/posts/:id' do
-      results = db.prepare('SELECT * FROM `posts` WHERE `id` = ?').execute(
+      results = db.prepare(<<SQL
+SELECT p.id AS id, p.user_id AS user_id, p.body AS body, p.created_at AS created_at, p.ext AS ext, u.del_flg AS del_flg
+FROM posts p JOIN users u ON p.user_id = u.id
+WHERE p.id = ?
+SQL
+      ).execute(
         params[:id]
       )
+
+      # results = db.prepare('SELECT * FROM `posts` WHERE `id` = ?').execute(
+      #   params[:id]
+      # )
       posts = make_posts(results, all_comments: true)
 
       return 404 if posts.length == 0
