@@ -241,7 +241,7 @@ module Isuconp
       results = db.query(<<SQL
 SELECT p.id AS id, p.user_id AS user_id, p.body AS body, p.created_at AS created_at, p.ext AS ext, u.del_flg AS del_flg
 FROM posts p JOIN users u ON p.user_id = u.id
-WHERE del_flg = 0
+WHERE u.del_flg = 0
 ORDER BY p.created_at DESC
 SQL
       )
@@ -260,9 +260,19 @@ SQL
         return 404
       end
 
-      results = db.prepare('SELECT `id`, `user_id`, `body`, `created_at`, `ext` FROM `posts` WHERE `user_id` = ? ORDER BY `created_at` DESC').execute(
+      results = db.prepare(<<SQL
+SELECT p.id AS id, p.user_id AS user_id, p.body AS body, p.created_at AS created_at, p.ext AS ext, u.del_flg AS del_flg
+FROM posts p JOIN users u ON p.user_id = u.id
+WHERE u.id = ? AND u.del_flg = 0
+ORDER BY p.created_at DESC
+SQL
+      ).execute(
         user[:id]
       )
+
+      # results = db.prepare('SELECT `id`, `user_id`, `body`, `created_at`, `ext` FROM `posts` WHERE `user_id` = ? ORDER BY `created_at` DESC').execute(
+      #   user[:id]
+      # )
       posts = make_posts(results)
 
       comment_count = db.prepare('SELECT COUNT(*) AS count FROM `comments` WHERE `user_id` = ?').execute(
