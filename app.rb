@@ -148,7 +148,7 @@ module Isuconp
 
         posts
 =end
-        results.each do |result|
+        results.to_a.each do |result|
           post = {}
           post[:comment_count] = db.prepare('SELECT COUNT(*) AS `count` FROM `comments` WHERE `post_id` = ?').execute(result[:id]).first[:count]
 
