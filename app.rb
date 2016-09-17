@@ -54,6 +54,12 @@ module Isuconp
         end
       end
 
+      def image_initialize
+        FileUtils.mv('/home/isucon/private_isu/webapp/public/image/10000.png', '/home/isucon/private_isu/webapp/public/image/10000.png.backup')
+        FileUtils.rm('/home/isucon/private_isu/webapp/public/image/[123456789]????*.???')
+        FileUtils.mv('/home/isucon/private_isu/webapp/public/image/10000.png.backup', '/home/isucon/private_isu/webapp/public/image/10000.png')
+      end
+
       def try_login(account_name, password)
         user = db.prepare('SELECT * FROM users WHERE account_name = ? AND del_flg = 0').execute(account_name).first
 
@@ -145,6 +151,7 @@ module Isuconp
 
     get '/initialize' do
       db_initialize
+      image_initialize
       return 200
     end
 
