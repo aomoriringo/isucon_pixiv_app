@@ -1,3 +1,6 @@
+
+ENV['RACK_ENV'] = 'development'
+
 require 'sinatra/base'
 require 'mysql2'
 require 'rack-flash'
