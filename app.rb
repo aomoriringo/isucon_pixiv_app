@@ -56,7 +56,7 @@ module Isuconp
 
       def image_initialize
         FileUtils.mv('/home/isucon/private_isu/webapp/public/image/10000.png', '/home/isucon/private_isu/webapp/public/image/10000.png.backup')
-        FileUtils.rm('/home/isucon/private_isu/webapp/public/image/[123456789]????*.???')
+        FileUtils.rm(Dir.glob('/home/isucon/private_isu/webapp/public/image/[123456789]????*.???'))
         FileUtils.mv('/home/isucon/private_isu/webapp/public/image/10000.png.backup', '/home/isucon/private_isu/webapp/public/image/10000.png')
       end
 
