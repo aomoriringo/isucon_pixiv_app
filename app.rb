@@ -116,7 +116,9 @@ module Isuconp
       end
 
       def make_posts(results, all_comments: false)
+=begin
         posts = []
+
         results.to_a.each do |post|
           post[:comment_count] = db.prepare('SELECT COUNT(*) AS `count` FROM `comments` WHERE `post_id` = ?').execute(
             post[:id]
@@ -145,6 +147,18 @@ module Isuconp
         end
 
         posts
+=end
+        results.each_with_object({}) do |result, post|
+          post[:comment_count] = db.prepare('SELECT COUNT(*) AS `count` FROM `comments` WHERE `post_id` = ?').execute(result[:id]).first[:count]
+
+          query = 'SELECT `comment`, `account_name` FROM `comments` WHERE `post_id` = ? ORDER BY `created_at` DESC'
+          query += ' LIMIT 3' unless all_comments
+
+          post[:comments] = db.prepare(query).execute(result[:id]).reverse
+          post[:user] = db.prepare('SELECT * FROM `users` WHERE `id` = ?').execute(post[:user_id]).first
+
+          post
+        end
       end
 
       def image_url(post)
