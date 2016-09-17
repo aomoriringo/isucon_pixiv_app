@@ -145,11 +145,11 @@ module Isuconp
 
       def image_url(post)
         ext = ""
-        if post[:mime] == "image/jpeg"
+        if post[:ext] == 1
           ext = ".jpg"
-        elsif post[:mime] == "image/png"
+        elsif post[:ext] == 2
           ext = ".png"
-        elsif post[:mime] == "image/gif"
+        elsif post[:ext] == 3
           ext = ".gif"
         end
 
@@ -238,7 +238,7 @@ module Isuconp
     get '/' do
       me = get_session_user()
 
-      results = db.query('SELECT `id`, `user_id`, `body`, `created_at` FROM `posts` ORDER BY `created_at` DESC')
+      results = db.query('SELECT `id`, `user_id`, `body`, `created_at`, `ext` FROM `posts` ORDER BY `created_at` DESC')
       posts = make_posts(results)
 
       erb :index, layout: :layout, locals: { posts: posts, me: me }
@@ -253,7 +253,7 @@ module Isuconp
         return 404
       end
 
-      results = db.prepare('SELECT `id`, `user_id`, `body`, `created_at` FROM `posts` WHERE `user_id` = ? ORDER BY `created_at` DESC').execute(
+      results = db.prepare('SELECT `id`, `user_id`, `body`, `created_at`, `ext` FROM `posts` WHERE `user_id` = ? ORDER BY `created_at` DESC').execute(
         user[:id]
       )
       posts = make_posts(results)
@@ -282,7 +282,7 @@ module Isuconp
 
     get '/posts' do
       max_created_at = params['max_created_at']
-      results = db.prepare('SELECT `id`, `user_id`, `body`, `created_at` FROM `posts` WHERE `created_at` <= ? ORDER BY `created_at` DESC').execute(
+      results = db.prepare('SELECT `id`, `user_id`, `body`, `created_at`, `ext` FROM `posts` WHERE `created_at` <= ? ORDER BY `created_at` DESC').execute(
         max_created_at.nil? ? nil : Time.iso8601(max_created_at).localtime
       )
       posts = make_posts(results)
@@ -362,6 +362,7 @@ module Isuconp
       end
     end
 
+=begin
     get '/image/:id.:ext' do
       if params[:id].to_i == 0
         return ""
@@ -378,6 +379,7 @@ module Isuconp
 
       return 404
     end
+=end
 
     post '/comment' do
       me = get_session_user()
