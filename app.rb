@@ -336,12 +336,12 @@ SQL
       posts = make_posts(results)
 =end
 
-      max_created_at = params['max_created_at'].nil? ? "" : "AND p.created_at <= '#{params['max_created_at']}'"
+      max_created_at = params['max_created_at'].nil? ? "" : "p.created_at <= '#{params['max_created_at']}' AND "
 
       query = <<SQL
 SELECT p.id AS id, p.user_id AS user_id, p.body AS body, p.created_at AS created_at, p.ext AS ext, p.account_name AS account_name, u.del_flg AS del_flg
 FROM posts p JOIN users u ON p.user_id = u.id
-WHERE u.del_flg = 0 #{max_created_at}
+WHERE #{max_created_at} u.del_flg = 0
 ORDER BY p.created_at DESC
 LIMIT 20
 SQL
