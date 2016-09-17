@@ -148,7 +148,8 @@ module Isuconp
 
         posts
 =end
-        results.each_with_object({}) do |result, post|
+        results.each do |result|
+          post = {}
           post[:comment_count] = db.prepare('SELECT COUNT(*) AS `count` FROM `comments` WHERE `post_id` = ?').execute(result[:id]).first[:count]
 
           query = 'SELECT `comment`, `account_name` FROM `comments` WHERE `post_id` = ? ORDER BY `created_at` DESC'
