@@ -16,6 +16,10 @@ module Isuconp
 
     POSTS_PER_PAGE = 20
 
+    configure :development do
+      register Sinatra::Reloader
+    end
+
     helpers do
       def config
         @config ||= {
