@@ -18,6 +18,8 @@ module Isuconp
     POSTS_PER_PAGE = 20
 
     configure :development do
+      require "better_errors"
+      require "binding_of_caller"
       register Sinatra::Reloader
       use BetterErrors::Middleware
       use Rack::Lineprof, profile: 'app.rb'
