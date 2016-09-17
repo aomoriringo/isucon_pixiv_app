@@ -488,7 +488,7 @@ SQL
         }
 
         redis.lpush('index_posts', pid)
-        redis.hset('index_cache', pid, render_index_post(post_detail), true)
+        redis.hset('index_cache', pid, render_index_post(post_detail, true))
 
         redirect "/posts/#{pid}", 302
       else
