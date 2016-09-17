@@ -91,7 +91,7 @@ LIMIT 100
 SQL
 
         db.query(query).each do |post|
-          redis.lpush(post[:id])
+          redis.lpush('index_posts', post[:id])
           redis.hset('index_cache', post[:id], render_index_post({id: post[:id]}))
         end
       end
@@ -312,7 +312,7 @@ SQL
       posts = make_posts(results)
 =end
 
-      posts = redis.hmget('index_cache', redis.lrange(0, 19))
+      posts = redis.hmget('index_cache', redis.lrange('index_posts', 0, 19))
       erb :index, layout: :layout, locals: { posts: posts, me: me }
 
     end
