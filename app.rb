@@ -158,7 +158,6 @@ module Isuconp
           query += ' LIMIT 3' unless all_comments
 
           post[:comments] = db.query(query)
-          post[:user] = db.query("SELECT * FROM `users` WHERE `id` = #{result[:user_id]}").first
 
           post
         end
