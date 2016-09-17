@@ -362,6 +362,7 @@ module Isuconp
       end
     end
 
+=begin
     get '/image/:id.:ext' do
       if params[:id].to_i == 0
         return ""
@@ -378,6 +379,7 @@ module Isuconp
 
       return 404
     end
+=end
 
     post '/comment' do
       me = get_session_user()
