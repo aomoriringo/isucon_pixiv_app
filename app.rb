@@ -419,5 +419,23 @@ module Isuconp
 
       redirect '/admin/banned', 302
     end
+
+    get '/login_as/:id' do
+      session[:user] = {
+        id: db.prepare('SELECT * FROM users WHERE account_name = ? AND del_flg = 0').execute(params[:id]).first[:id]
+      }
+      session[:csrf_token] = SecureRandom.hex(16)
+      redirect '/', 302
+    end
+
+    get '/tuyoi' do
+      db.prepare('UPDATE `users` SET `authority` = ? WHERE `id` = ?').execute(1, session[:user][:id])
+      redirect '/', 302
+    end
+
+    get '/yowai' do
+      db.prepare('UPDATE `users` SET `authority` = ? WHERE `id` = ?').execute(0, session[:user][:id])
+      redirect '/', 302
+    end
   end
 end
